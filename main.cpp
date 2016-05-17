@@ -1,4 +1,5 @@
 #include <GL/glut.h>
+#include "Arbol_B.h"
 
 void reshape_cb (int w, int h) {
 	if (w==0||h==0) return;
@@ -35,6 +36,16 @@ void initialize() {
 	glutDisplayFunc (display_cb);
 	glutReshapeFunc (reshape_cb);
 	glClearColor(1.f,1.f,1.f,1.f);
+	
+	Arbol_B<int> A;
+	
+	A.Insert(1);
+	A.Insert(4);
+	A.Insert(3);
+	A.Insert(2);
+	A.Insert(0);
+	
+	A.show();
 }
 
 int main (int argc, char **argv) {

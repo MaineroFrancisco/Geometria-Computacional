@@ -1,5 +1,13 @@
 #ifndef GRAFOS_H
 #define GRAFOS_H
+#include <list>
+#include <deque>
+
+using namespace std;
+
+struct vertex;
+struct halfedge;
+struct face;
 
 struct vertex{
 	double x;

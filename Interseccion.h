@@ -1,23 +1,27 @@
 #ifndef INTERSECCION_H
 #define INTERSECCION_H
+#include <vector>
+#include "Grafos.h"
+
+using namespace std;
 
 struct punto{
 	double x;
 	double y;
 	
-}
+};
 
 struct segmento{
 	punto ini;
 	punto fin;
 	
-}
+};
 
 ///Puntos de Eventos, puntos significativos a la hora de recorrer con la linea de barrido
 struct event_point{
 	punto p; ///Coordenada del punto.
 	vector<segmento> U;	///Conjuntos de INDICES de los segmentos que comienzan en ese punto.
-}
+};
 
 ///Dado un conjunto de puntos y los segmentos formados por esos puntos, construyo el grafo correspondiente
 ///aplicando el algoritmo de interseccion de la Sweep Line visto en clase.
@@ -35,7 +39,7 @@ private:
 	
 public:
 	Interseccion();
-	Interseccion(/*lista de puntos, no decido se un vector<punto>, o 2 vector<double> X, Y*/, vector<segmento>);	//Tambien es una posibilidad que yo armo la lista de segmentos afuera al azar, y luego la mando aca como parametro.
+	//Interseccion(/*lista de puntos, no decido se un vector<punto>, o 2 vector<double> X, Y*/, vector<segmento>);	//Tambien es una posibilidad que yo armo la lista de segmentos afuera al azar, y luego la mando aca como parametro.
 	
 	Grafos grafo_resultante(); ///Devuelve finalmente el grafo reusltante del conjunto de segmentos.
 	
