@@ -1,5 +1,9 @@
 #include <GL/glut.h>
+#include <iostream>
+#include <iomanip>
 #include "Arbol_B.h"
+
+using namespace std;
 
 void reshape_cb (int w, int h) {
 	if (w==0||h==0) return;
@@ -36,16 +40,60 @@ void initialize() {
 	glutDisplayFunc (display_cb);
 	glutReshapeFunc (reshape_cb);
 	glClearColor(1.f,1.f,1.f,1.f);
-	
+
+//------------------------------------------------------------------------------	
+	//ESTO ES ENTERAMENTE PARA EL TESTEO DE LA ESTRUCTURA ARBOL, LUEGO ELIMINAR...
 	Arbol_B<int> A;
+	for (int i=0;i<16;i++){
+		A.Insert(i);
+	}
+	//No funciona para event_points y segmentos todavia... probar con MUCHOS ENTEROS,
+	//problema en el manejo del factor de balanceo... posiblemente deba eliminarlo como atributo,
+	//reemplazandolo por una funcion, o cambiar su tratamiento...
 	
-	A.Insert(1);
-	A.Insert(4);
-	A.Insert(3);
-	A.Insert(2);
-	A.Insert(0);
+//	event_point a,b;
+//	a.p.x = 1;
+//	a.p.y = 3;
+//	b.p.x = 1;
+//	b.p.y = 1; 
+//	
+//	event_point c,d;
+//	c.p.x = 3;
+//	c.p.y = 3;
+//	d.p.x = 3;
+//	d.p.y = 1; 
+//	
+//	event_point e,f;
+//	e.p.x = 2;
+//	e.p.y = 4;
+//	f.p.x = 2;
+//	f.p.y = 6;
+//	
+//	A.Insert(a);
+//	A.Insert(b);
+//	A.Insert(c);
+//	A.Insert(d);
+//	A.Insert(e);
+//	A.Insert(f);
+
+//	A.show();
+	//cout<<endl;
+	//cout<<"Delete:"<<endl;
 	
+	//A.Delete(c);
+	cout<<"Insert: "<<endl<<endl;
 	A.show();
+	cout<<endl;
+	cout<<"Delete: "<<endl<<endl;
+	A.Delete(14);
+	A.show();
+//	char* asd = NULL;
+//	if(asd)	NULL = no...
+//		cout<<"es null"<<endl;
+//	if(!asd)
+//		cout<<"no es null"<<endl;
+	
+//------------------------------------------------------------------------------
 }
 
 int main (int argc, char **argv) {
