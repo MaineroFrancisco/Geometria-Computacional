@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <iostream>
 #include <cstdlib>
-#include "Interseccion.h"
 
 ///COMPLETAR ESTA CLASE TEMPLATE Y PROBARLA CON ENTEROS, LUEGO PASAR A PROBARLA CON ESTRUCTURAS QUE
 ///TENGAN SOBRECARGADO EL OPERADOR < ...
@@ -32,15 +31,12 @@ template<class T>
 class Arbol_B {
 private:
 
-	//double sweep_line;	//Altura de la Sweep Line. Parametro extra para usarlo con los segmentos, posibemente se termine cambiando.
 	nodo<T>* raiz;
 	nodo<T>* actual;
 	
 	
 public:
 	Arbol_B();
-	//Arbol_B(double SL_heigth); //al momenot de usarlo con los segmentos, necesitaria un parametro extra para considerar la altura de la sweep_line;
-			//si se emplea este metodo, se debera considerar en Arbol_B(), que se debe poner "sweep_line" como un valor invalido para saber cuando se trata de uno u otro, y no generar conflictos.
 	
 	//Ya se realiza una correcta insercion y balanceo...
 	void Insert(T ep);	//REVISAR SI NO SERIA NECESARIO RETORNAR EL AGREGADO...
@@ -51,8 +47,6 @@ public:
 	
 	nodo<T>* Find(T ep);	//para buscar un elemento determinado en el arbol.Util para el Delete
 	nodo<T>* Find(T ep, nodo<T>* act);
-	
-	//void alturaSL(double SL_heigth);	//para pasar la altura de la SL cada ves que se requiera.
 	
 	//UTILES PARA LA ELIMINACION
 	//Busca el vecino por izquierda de un nodo, el mas derecho (rightmost) de la izquierda
@@ -71,7 +65,6 @@ public:
 	//realiza el balance del arbol, para arbol AVL, chequeo la altura por izuqierda y por derecha, si difiere, debo realizar un giro en ese sentido.
 	nodo<T>* balance_insert(nodo<T>* P, nodo<T>* N);
 	nodo<T>* balance_delete(nodo<T>* P, nodo<T>* N);
-	///void balance(nodo<T>* root);
 	
 	///Para mostrar el arbol al testear...
 	void show();

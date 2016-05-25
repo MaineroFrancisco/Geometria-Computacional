@@ -1,4 +1,5 @@
 #include "Arbol_B.h"
+#include "Interseccion.h"
 
 using namespace std;
 
@@ -12,6 +13,7 @@ template<class T>
 Arbol_B<T>::~Arbol_B() {
 	
 }
+
 //------------------------------------------------------------------------------
 ///Inserta el nodo a partir de la raiz, para insertarlo correctamente a izquierda o derecha, segun corresponda,
 ///y realizar el balanceo...
@@ -93,11 +95,14 @@ void Arbol_B<T>::Delete (T ep) {
 	
 	actual=raiz;
 
-	nodo<T>* eliminado;
+	///PROBLEMA CON EL PASAJE POR REFERENCIA DE DATOS, SOLUCIONAR PARA LA GENERALIDAD DEL TEMPLATE...
+	nodo<T>* elim = NULL;
 	
-	actual = Delete(ep, actual, eliminado);
+	raiz = Delete(ep, actual, elim);
 	
-	raiz = balance_delete(eliminado->father,eliminado);
+	if(elim){
+		raiz = balance_delete(elim->father, elim);
+	}
 	
 }
 
@@ -141,6 +146,7 @@ nodo<T>* Arbol_B<T>::Delete (T ep, nodo<T>* act, nodo<T>* elim) {
 		//llegue al nodo que busco
 	}
 	else{
+		
 		if(ep<act->p){
 			//Como el nodo que quiero borrar esta a la izquierda al momento de borrarlo,
 			//mi factor de balanceo se incrementa en 1, ya que hay un elemento izquierdo menos.
@@ -157,11 +163,6 @@ nodo<T>* Arbol_B<T>::Delete (T ep, nodo<T>* act, nodo<T>* elim) {
 		}
 	}
 	
-	//El balance se debe hacer dentro del Delete, para aprovechar la recursion.
-	///POSIBLEMENTE DEBA SACAR EL BALANCEO DEL INSERT Y EL DELETE Y 
-	///IMPLEMENTARLO COMO ALGO APARTE...
-	//act = balance(act->father,act);
-	
 	if(!eliminado){
 		elim = act;
 	}
@@ -172,12 +173,32 @@ nodo<T>* Arbol_B<T>::Delete (T ep, nodo<T>* act, nodo<T>* elim) {
 //------------------------------------------------------------------------------
 template<class T>
 nodo<T>* Arbol_B<T>::left (nodo<T> * l) {
-	return rightmost(l->left);
+	
+	if(l->left){
+		return rightmost(l->left);
+		
+	}
+	else{
+		if(l->father->right == l)
+			return l->father;
+	}
+	
+	return NULL;
 }
 
 template<class T>
 nodo<T> * Arbol_B<T>::right (nodo<T> * r) {
-	return leftmost(r->right);
+	
+	if(r->right){
+		return leftmost(r->right);
+		
+	}
+	else{
+		if(r->father->left == r)
+			return r->father;
+	}
+	
+	return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -201,10 +222,22 @@ nodo<T> * Arbol_B<T>::rightmost (nodo<T> * r) {
 template<class T>
 nodo<T>* Arbol_B<T>::Find (T ep) {
 	
+	return Find(ep,raiz);
+	
 }
+
 template<class T>
 nodo<T>* Arbol_B<T>::Find (T ep, nodo<T>* act) {
 	
+	if(ep == act->p)
+		return act;
+	
+	if(ep<act->p){
+		return Find(ep,act->left);
+	}
+	else{
+		return Find(ep,act->right);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -370,8 +403,6 @@ nodo<T>* Arbol_B<T>::balance_delete(nodo<T>* P, nodo<T>* N) {
 	//Si no llega a un giro hasta la raiz, se movera hasta al raiz y la retornara para no perder el
 	//hilo del arbol, actualizarlo siempre
 	
-	///ANDAAAAAAA!!! ... Ahora optimizar y empezar la interseccion...
-	///ARREGLAR LO DE ACA ABAJO... UNA PIJA...
 	P = R;
 	N = R;
 	while(P != NULL){
@@ -412,6 +443,7 @@ template<class T>
 void Arbol_B<T>::show(){
 	show(raiz,0);
 }
+
 template<class T>
 void Arbol_B<T>::show (nodo<T>* act, int nivel) {
 	
@@ -425,10 +457,10 @@ void Arbol_B<T>::show (nodo<T>* act, int nivel) {
 	
 	cout<<"Nivel: "<<nivel<<endl;
 	
-	cout<<act->p<<"	";
+///	cout<<act->p<<"	";
 	
 	//SOLO PARA TESTEO, ELIMINAR LUEGO...
-	//act->p.show();
+	act->p.show();
 	
 	//cout<<"Balance Factor: "<<act->balance_factor<<endl;
 	cout <<endl;
@@ -439,6 +471,7 @@ void Arbol_B<T>::show (nodo<T>* act, int nivel) {
 	
 }
 
-template class Arbol_B<int>;
-//template class Arbol_B<segmento>;
-//template class Arbol_B<event_point>;
+///NECESARIO PARA EL FUNCIONAMIENTO, DEFINIR AQUI EN QUE TIPOS SE PODRA EMPLEAR EL ARBOL...
+//template class Arbol_B<int>;
+template class Arbol_B<segmento>;
+template class Arbol_B<event_point>;

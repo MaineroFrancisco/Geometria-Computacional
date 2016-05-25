@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include "Arbol_B.h"
+#include "Interseccion.h"
 
 using namespace std;
 
@@ -43,38 +44,38 @@ void initialize() {
 
 //------------------------------------------------------------------------------	
 	//ESTO ES ENTERAMENTE PARA EL TESTEO DE LA ESTRUCTURA ARBOL, LUEGO ELIMINAR...
-	Arbol_B<int> A;
-	for (int i=0;i<16;i++){
-		A.Insert(i);
-	}
+	Arbol_B<event_point> A;
+//	for (int i=0;i<16;i++){
+//		A.Insert(i);
+//	}
 	//No funciona para event_points y segmentos todavia... probar con MUCHOS ENTEROS,
 	//problema en el manejo del factor de balanceo... posiblemente deba eliminarlo como atributo,
 	//reemplazandolo por una funcion, o cambiar su tratamiento...
 	
-//	event_point a,b;
-//	a.p.x = 1;
-//	a.p.y = 3;
-//	b.p.x = 1;
-//	b.p.y = 1; 
-//	
-//	event_point c,d;
-//	c.p.x = 3;
-//	c.p.y = 3;
-//	d.p.x = 3;
-//	d.p.y = 1; 
-//	
-//	event_point e,f;
-//	e.p.x = 2;
-//	e.p.y = 4;
-//	f.p.x = 2;
-//	f.p.y = 6;
-//	
-//	A.Insert(a);
-//	A.Insert(b);
-//	A.Insert(c);
-//	A.Insert(d);
-//	A.Insert(e);
-//	A.Insert(f);
+	event_point a,b;
+	a.p.x = 1;
+	a.p.y = 3;
+	b.p.x = 1;
+	b.p.y = 1; 
+	
+	event_point c,d;
+	c.p.x = 3;
+	c.p.y = 3;
+	d.p.x = 3;
+	d.p.y = 1; 
+	
+	event_point e,f;
+	e.p.x = 2;
+	e.p.y = 4;
+	f.p.x = 2;
+	f.p.y = 6;
+	
+	A.Insert(a);
+	A.Insert(b);
+	A.Insert(c);
+	A.Insert(d);
+	A.Insert(e);
+	A.Insert(f);
 
 //	A.show();
 	//cout<<endl;
@@ -85,8 +86,13 @@ void initialize() {
 	A.show();
 	cout<<endl;
 	cout<<"Delete: "<<endl<<endl;
-	A.Delete(14);
+
+	A.Delete(c);
+	A.Delete(d);
+	A.Delete(e);
+	
 	A.show();
+	
 //	char* asd = NULL;
 //	if(asd)	NULL = no...
 //		cout<<"es null"<<endl;

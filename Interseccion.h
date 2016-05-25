@@ -1,8 +1,8 @@
 #ifndef INTERSECCION_H
 #define INTERSECCION_H
 #include <vector>
-#include <iostream>
 #include "Grafos.h"
+#include "Arbol_B.h"
 
 using namespace std;
 
@@ -47,6 +47,11 @@ struct segmento{
 	punto ini;
 	punto fin;
 	
+	///CARGO EN CADA SEGMENTO UN PUNTERO A LA ALTURA DE LA SWEEP_LINE, SIEMPRE ANTES DE INSERTAR O ELIMINAR DEL ARBOL...
+	double* y;
+	
+	///VAS A TERMINAR PASANDO LA ALTURA COMO UN VALOR PARA EL SEMGENTO... MUCHO GASTO DE MEMORIA...
+	
 	double get_x(double altura){
 		double delta_x, delta_y, m, b, X;
 		
@@ -74,15 +79,26 @@ struct segmento{
 	//bool operator<(segmento Q, double altura){
 	bool operator<(segmento Q){
 		
-		//DE ACA PARA ABAJO ESTA ARMADO DE ESTA FORMA PARA SER TESTEADO CON
-		//RECTAS VERTICALES SEPARADAS (SIN INTERSECCION), SOLO PARA CORROBORAR
-		//EL ORDENAMIENTO Y BALANCEO EN EL ARBOL BALANCEADO... CAMBIARLO LUEGO!...
+		double error = 0.00000005;
+		double altura = *(this->y);
+		double A = this->get_x(altura);
+		double C = Q.get_x(altura);
 		
-		if(this->ini.x<Q.ini.x){
+		if(C < A-error){
 			return true;
 		}
+		else{
+			if(C > A+error){
+				return false;
+			}
+			else{
+				//bajo un poco la sweep_line y reviso, solo se da en el caso de ser un punto interseccion
+				*(this->y) = altura - 2*error;  
+				return *this < Q;
+			}
+		}
 		
-		return false;
+		
 	}
 	
 	bool operator==(segmento Q){
@@ -126,14 +142,20 @@ private:
 	vector<segmento> S;///Almacena el conjunto de segmentos a tratar, los puntos estan almacenados en cada segmento.
 	
 	/*Cola de Eventos*/	//falta decidir la estructura para almacenar los eventos (SET  lo mas probable)
+	Arbol_B<event_point> Q;
+	
 	/*Arbol de Estado*/ //y crear el arbol balanceado para los estados.
+	Arbol_B<segmento> T;
 	
 	vector<vertex> intersecciones; ///Vector que almacena los puntos resultantes de las intersecciones 
+	
+	double sweep_line; ///Altura de la Sweep Line
 	
 	Grafos grafo;	///Grafo final formado por los segmentos.
 	
 public:
 	Interseccion();
+	Interseccion(vector<segmento> Seg);
 	//Interseccion(/*lista de puntos, no decido se un vector<punto>, o 2 vector<double> X, Y*/, vector<segmento>);	//Tambien es una posibilidad que yo armo la lista de segmentos afuera al azar, y luego la mando aca como parametro.
 	
 	Grafos grafo_resultante(); ///Devuelve finalmente el grafo reusltante del conjunto de segmentos.
