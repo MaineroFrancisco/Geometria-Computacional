@@ -1,35 +1,13 @@
 #ifndef GRAFOS_H
 #define GRAFOS_H
+#include "Estructuras.h"
 #include <list>
 #include <deque>
 
 using namespace std;
 
-struct vertex;
-struct halfedge;
-struct face;
-
-struct vertex{
-	double x;
-	double y;
-	halfedge* incidente;
-};
-
-struct halfedge{
-	vertex* origen;
-	face* incidente;
-	
-	halfedge* gemela;
-	halfedge* anterior;
-	halfedge* siguiente;
-};
-
-struct face{
-	halfedge* exterior;
-	list<halfedge*> f_interior;
-};
-
 //Revisar si es necesaria una clase, o un Struct con las 3 DCEL
+//Un Struct posiblemente sea mas ocnveniente para hcer la intergracion con interseccion...
 class Grafos {
 private:
 	

@@ -1,5 +1,5 @@
 #include "Arbol_B.h"
-#include "Interseccion.h"
+#include "Estructuras.h"
 
 using namespace std;
 
@@ -172,37 +172,6 @@ nodo<T>* Arbol_B<T>::Delete (T ep, nodo<T>* act, nodo<T>* elim) {
 
 //------------------------------------------------------------------------------
 template<class T>
-nodo<T>* Arbol_B<T>::left (nodo<T> * l) {
-	
-	if(l->left){
-		return rightmost(l->left);
-		
-	}
-	else{
-		if(l->father->right == l)
-			return l->father;
-	}
-	
-	return NULL;
-}
-
-template<class T>
-nodo<T> * Arbol_B<T>::right (nodo<T> * r) {
-	
-	if(r->right){
-		return leftmost(r->right);
-		
-	}
-	else{
-		if(r->father->left == r)
-			return r->father;
-	}
-	
-	return NULL;
-}
-
-//------------------------------------------------------------------------------
-template<class T>
 nodo<T> * Arbol_B<T>::leftmost (nodo<T> * l) {
 	if(l->left==NULL){
 		return l;
@@ -221,9 +190,7 @@ nodo<T> * Arbol_B<T>::rightmost (nodo<T> * r) {
 //------------------------------------------------------------------------------
 template<class T>
 nodo<T>* Arbol_B<T>::Find (T ep) {
-	
-	return Find(ep,raiz);
-	
+	return Find(ep,raiz);	
 }
 
 template<class T>
@@ -471,7 +438,19 @@ void Arbol_B<T>::show (nodo<T>* act, int nivel) {
 	
 }
 
+template<class T>
+bool Arbol_B<T>::empty ( ) {
+	return !raiz;
+}
+
+template<class T>
+nodo<T>* Arbol_B<T>::begin ( ) {
+	return raiz;
+}
+
 ///NECESARIO PARA EL FUNCIONAMIENTO, DEFINIR AQUI EN QUE TIPOS SE PODRA EMPLEAR EL ARBOL...
 //template class Arbol_B<int>;
 template class Arbol_B<segmento>;
 template class Arbol_B<event_point>;
+
+

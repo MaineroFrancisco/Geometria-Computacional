@@ -48,12 +48,6 @@ public:
 	nodo<T>* Find(T ep);	//para buscar un elemento determinado en el arbol.Util para el Delete
 	nodo<T>* Find(T ep, nodo<T>* act);
 	
-	//UTILES PARA LA ELIMINACION
-	//Busca el vecino por izquierda de un nodo, el mas derecho (rightmost) de la izquierda
-	nodo<T>* left(nodo<T>* l);
-	//Busca el vecino por izquierda de un nodo, el mas izquierdo (leftmost) de la derecha
-	nodo<T>* right(nodo<T>* r);
-
 	//El mas izquierdo a partir de un nodo
 	nodo<T>* leftmost(nodo<T>* l);
 	//El mas derecho a partir de un nodo
@@ -65,6 +59,9 @@ public:
 	//realiza el balance del arbol, para arbol AVL, chequeo la altura por izuqierda y por derecha, si difiere, debo realizar un giro en ese sentido.
 	nodo<T>* balance_insert(nodo<T>* P, nodo<T>* N);
 	nodo<T>* balance_delete(nodo<T>* P, nodo<T>* N);
+	
+	bool empty();
+	nodo<T>* begin();
 	
 	///Para mostrar el arbol al testear...
 	void show();
