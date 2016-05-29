@@ -13,18 +13,26 @@ Grafos Interseccion::grafo_resultante ( ) {
 }
 
 vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
-
+	
 	///1) Inicializar Q el arbol que contendra los event_point
-	/*Cola de Eventos*/	//falta decidir la estructura para almacenar los eventos (SET  lo mas probable)
-	Arbol_B<event_point> Q;
 	
 	event_point ini_aux, fin_aux;
 	
 	///Agregar los puntos de los segmentos en S como puntos de evento en Q
 	int n = S.size();
 	for (int i=0; i<n;i++){
+		
+		GraphConverter(S[i]);
+		
+		///Como las aristas siempre se insertan al final, hago uso de eso 
+		///para asignar los halfedge correspondientes a cada segmento.
+		
+		//Señala a la arista izquierda, la que corresponderia al interior, puedo moverme a 
+		//cualquiera haciendo uso de la gemela.
+		S[i].halfEdge = grafo.arista.size()-1;	
+		
 		ini_aux.p = S[i].ini;
-		ini_aux.U.push_back(i);
+		ini_aux.U.push_back(S[i]);
 		
 		fin_aux.p = S[i].fin;
 		
@@ -34,7 +42,7 @@ vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
 			Q.Insert(ini_aux);
 		}
 		else{
-			n_aux->p.U.push_back(i);
+			n_aux->p.U.push_back(S[i]);
 		}
 		
 		n_aux = Q.Find(fin_aux);
@@ -45,14 +53,13 @@ vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
 	}
 	
 	///2) Inicializar el arbol de estados T...
-	/*Arbol de Estado*/ //y crear el arbol balanceado para los estados.
-	Arbol_B<segmento> T;
+	
 	event_point aux;
 	while(!Q.empty()){
 		
 		aux = Q.leftmost(Q.begin())->p;
 		
-		HandleEventPoint(aux,T);
+		HandleEventPoint(aux);
 		
 		Q.Delete(aux);
 		
@@ -61,9 +68,9 @@ vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
 }
 
 ///AGREGAR FIND_LC A INTERSECCION...LO MISMO PARA LAS QUE SON EXTRA EN ARBOL...ELIMINAR LEFT Y RIGHT DE ARBOL_B
-void find_LC(event_point p, Arbol_B<segmento> T, vector<segmento> L, vector<segmento> C, nodo<segmento>* n){
+void find_LC(event_point p, vector<segmento> L, vector<segmento> C, nodo<segmento>* n){
 	
-	find_LC (p,T,L,C,n->left);
+	find_LC (p,L,C,n->left);
 	
 	if(n->p.fin == p.p){
 		L.push_back(n->p);
@@ -74,18 +81,18 @@ void find_LC(event_point p, Arbol_B<segmento> T, vector<segmento> L, vector<segm
 		}
 	}
 	
-	find_LC (p,T,L,C,n->right);
+	find_LC (p,L,C,n->right);
 }
 
 ///LO SIGUIENTES PASOS NO CONTEMPLAN UNA RECTA HORIZONTAL, REVISAR Y ARREGLAR...
-void Interseccion::HandleEventPoint (event_point p, Arbol_B<segmento> T) {
+void Interseccion::HandleEventPoint (event_point p) {
 	
 ///------------------------------------------------------------------------------------------------------
 ///Paso 1: Encontrar los segmentos en T que terminan o contienen al evento 'p', los que incian con 'p' 
 ///	se encuentran almacenados en el mismo event_point.
 	
 	vector<segmento> L, C;
-	find_LC(p,T,L,C,T.begin());
+	find_LC(p,L,C,T.begin());
 	
 	int nU = p.U.size();
 	int nL = L.size();
@@ -98,7 +105,17 @@ void Interseccion::HandleEventPoint (event_point p, Arbol_B<segmento> T) {
 		
 		//REVISAR LA INTEGRACION DE ESTAS COSAS CON EL GRAFO....
 		
-		intersecciones.push_back();
+		///En los conjuntos U,C y L se poseen todos los segmentos que se intersectan en este punto de evento,
+		///en cuanto a la integracion del grafo, en este punto puedo tomar todos estos segmentos y realizar
+		/// los procedimientos necesario para actualizar el grafo.
+		
+		///Para el casod e lso segmentos en C, se deberan crear 2 halfedge nuevos, enlazarlos correctamente, y corregir
+		///los NEXT y PREV como corresponda, debido a esto, los segmentos en C deberian ser los primeros en tratarse,
+		///REVISAR!...
+		
+		///Para el caso de los segmentos en U y L solo se requerira cambiar los NEXT y PREV.
+		
+		intersecciones.push_back(p.p);
 	}
 
 ///------------------------------------------------------------------------------------------------------
@@ -110,12 +127,12 @@ void Interseccion::HandleEventPoint (event_point p, Arbol_B<segmento> T) {
 	///cual evito que recorra de manera equivocada el arbol al comparar empleando el operador '<'.
 	double altura = p.p.y + 0.0000005;
 	for(int i=0;i<nL;i++){
-		L[i].y = altura;
+		L[i].y = &altura;
 		T.Delete(L[i]);
 	}
 	
 	for(int i=0;i<nC;i++){
-		C[i].y = altura;
+		C[i].y = &altura;
 		T.Delete(C[i]);
 	}
 	
@@ -128,12 +145,12 @@ void Interseccion::HandleEventPoint (event_point p, Arbol_B<segmento> T) {
 	altura = p.p.y - 0.0000005;
 	
 	for(int i=0;i<nU;i++){
-		p.U[i].y = altura;
-		T.Insert(C[i]);
+		p.U[i].y = &altura;
+		T.Insert( p.U[i] );
 	}
 	
 	for(int i=0;i<nC;i++){
-		C[i].y = altura;
+		C[i].y = &altura;
 		T.Insert(C[i]);
 	}
 	
@@ -178,8 +195,8 @@ void Interseccion::findNewEvent (segmento sl, segmento sr, event_point p) {
 	event_point* inter = NULL;
 	
 	if(Interseccion(sl,sr,inter)){
-		if(inter->y < p.p.y && !Q.find(inter)){
-			Q.insert(inter);
+		if(inter->p.y < p.p.y && !Q.Find(*inter)){
+			Q.Insert(*inter);
 		}
 	}
 	
@@ -226,5 +243,38 @@ bool Interseccion::calc_inter (segmento s1, segmento s2, event_point &p) {
 	}
 	
 	return true;
+}
+
+
+void Interseccion::GraphConverter (segmento S) {
+	
+	vertex inAux,fnAux;
+	
+	halfedge iAux,dAux;
+	
+	inAux.p = S.ini; 
+	fnAux.p = S.fin; 
+	
+	dAux.origen = &inAux;
+	dAux.gemela = &iAux;
+	dAux.siguiente = &iAux;
+	dAux.anterior = &iAux;
+	dAux.incidente = NULL;
+	
+	iAux.origen = &fnAux;
+	iAux.gemela = &dAux;
+	iAux.siguiente = &dAux;
+	iAux.anterior = &dAux;
+	iAux.incidente = NULL;
+	
+	inAux.incidente = &dAux; 
+	fnAux.incidente = &iAux; 
+	
+	grafo.vertice.push_back(fnAux);
+	grafo.vertice.push_back(inAux);
+	
+	grafo.arista.push_back(iAux);
+	grafo.arista.push_back(dAux);
+	
 }
 

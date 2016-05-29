@@ -3,8 +3,11 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <deque>
 
 using namespace std;
+
+//------------------------------------------------------------------------------------------------------------
 
 struct punto{
 	double x;
@@ -42,6 +45,10 @@ struct segmento{
 	punto ini;
 	punto fin;
 	
+	///Guarda una referencia a una de las media aristas que representan el segmento, empleada para la 
+	///construccion del grafo, guardara la media arista por debajo de la sweep_line. 
+	int halfEdge;
+	
 	///CARGO EN CADA SEGMENTO UN PUNTERO A LA ALTURA DE LA SWEEP_LINE, SIEMPRE ANTES DE INSERTAR O ELIMINAR DEL ARBOL...
 	double* y;
 	
@@ -51,7 +58,7 @@ struct segmento{
 		double delta_x, delta_y, m, b, X;
 		
 		//Considerando la ecuacion de la recta:
-//				y = m * x + b; Siendo m la pendiente de la recta, y b su coordenada de origen.
+		//				y = m * x + b; Siendo m la pendiente de la recta, y b su coordenada de origen.
 		//Deduzco a partir de los puntos conocidos inicial y final la pendiente 
 		//y ordenada de origen, luego reemplazo por la altura buscada y calculo la x.
 		
@@ -65,7 +72,7 @@ struct segmento{
 		b= fin.y - m*fin.x;
 		
 		///Calculo de X a partir de un Y conocido.
-//				(y - b) / m = x;
+		//				(y - b) / m = x;
 		X = (altura - b) / m;
 		
 		return X;
@@ -128,7 +135,7 @@ struct segmento{
 ///Puntos de Eventos, puntos significativos a la hora de recorrer con la linea de barrido
 struct event_point{
 	punto p; ///Coordenada del punto.
-	vector<int> U;	///Conjuntos de INDICES de los segmentos que comienzan en ese punto.
+	vector<segmento> U;	///Conjuntos de INDICES de los segmentos que comienzan en ese punto.
 	
 	//Para realizar la comparacion emplea la sobrecarga del operador "<", el cual utiliza
 	//orden lexicografico, primero el de mayor y, si hay varios con la misma y, el de menor x.
@@ -172,5 +179,15 @@ struct face{
 	list<halfedge*> f_interior;
 };
 
+//------------------------------------------------------------------------------------------------------------
 
+struct Grafos{
+	
+	deque<vertex> vertice;
+	deque<halfedge> arista;
+	deque<face> cara;	//siempre deberia comenzar con 1 elemento, por la cara exterior al infinito.
+	
+};
+
+//------------------------------------------------------------------------------------------------------------
 #endif

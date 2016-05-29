@@ -1,7 +1,6 @@
 #ifndef INTERSECCION_H
 #define INTERSECCION_H
 #include <vector>
-#include "Grafos.h"
 #include "Arbol_B.h"
 #include "Estructuras.h"
 
@@ -12,16 +11,22 @@ using namespace std;
 class Interseccion {
 private:
 		
-	vector<vertex> intersecciones; ///Vector que almacena los puntos resultantes de las intersecciones 
+	vector<punto> intersecciones; ///Vector que almacena los puntos resultantes de las intersecciones 
 	
 	double sweep_line; ///Altura de la Sweep Line
+	
+	/*Cola de Eventos*/
+	Arbol_B<event_point> Q;
+	
+	/*Arbol de Estado*/
+	Arbol_B<segmento> T;
 	
 	Grafos grafo;	///Grafo final formado por los segmentos.
 	
 public:
 	Interseccion();
 	
-	Grafos grafo_resultante(); ///Devuelve finalmente el grafo reusltante del conjunto de segmentos.
+	Grafos grafo_resultante(); ///Devuelve finalmente el grafo resultante del conjunto de segmentos.
 	
 	/// S almacena el conjunto de segmentos a tratar, los puntos estan almacenados en cada segmento.
 	vector<vertex> FindIntersection( vector<segmento> S );
@@ -30,6 +35,22 @@ public:
 	void findNewEvent(segmento sl, segmento sr, event_point p);//sl = vecino izquierdo, sr = vecino derecho
 		//reviso interseccion entre vecinos y maneja puntos de eventos en Q.
 	punto calc_inter(segmento s1, segmento s2); //calculo la interseccion entre segmentos.
+	
+	///Pasos para la convercion a grafo.
+	
+	///Dado un conjunto de segmentos, devuelve los mismos traducidos a una estructura de grapo, para
+	///luego hacer la correccion de este grafo con las intersecciones encontradas.
+	//El resultado es almacenado en el componente "grafo" de la clase.
+	
+	//Cada segmento debera tener una referencia a su halfedge corespondiente, ma medida que se intersectan
+	//los segmentos se vana actualizando las referencias de los segmentos a los halfedge para reflejar 
+	//las aristas por debajo de la sweep_line que aun pueden ser intersectadas.
+	//Se continua con el supuesto central de que todo lo que esta por encimad e la sweep_line ya fue 
+	//correctamente tratado.
+	
+	void GraphConverter( segmento S );
+	
+	///Funcion de Correccion...
 	
 	~Interseccion();
 };
