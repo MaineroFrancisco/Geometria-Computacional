@@ -34,8 +34,8 @@ struct punto{
 	bool operator==(punto P){
 		
 		double error = 0.000000005;
-		bool up = this->x<=P.x + error  && this->y<=P.y + error;
-		bool down = this->x>=P.x - error  && this->y>=P.y - error;
+		bool up = (this->x <= (P.x + error))  && (this->y <= (P.y + error));
+		bool down = (this->x >= (P.x - error))  && (this->y >= (P.y - error));
 		
 		return up&&down;
 	}
@@ -50,11 +50,17 @@ struct segmento{
 	int halfEdge;
 	
 	///CARGO EN CADA SEGMENTO UN PUNTERO A LA ALTURA DE LA SWEEP_LINE, SIEMPRE ANTES DE INSERTAR O ELIMINAR DEL ARBOL...
+	
 	double* y;
 	
 	///VAS A TERMINAR PASANDO LA ALTURA COMO UN VALOR PARA EL SEMGENTO... MUCHO GASTO DE MEMORIA...
 	
 	double get_x(double altura){
+		
+		if(ini.x==fin.x){
+			return ini.x;
+		}
+		
 		double delta_x, delta_y, m, b, X;
 		
 		//Considerando la ecuacion de la recta:
@@ -62,7 +68,7 @@ struct segmento{
 		//Deduzco a partir de los puntos conocidos inicial y final la pendiente 
 		//y ordenada de origen, luego reemplazo por la altura buscada y calculo la x.
 		
-		delta_x = ini.x - fin.x;
+		delta_x = ini.x - fin.x;	//Se caga para segmentos veritcales, arreblar...
 		delta_y = ini.y - fin.y;
 		
 		///Pendiente
@@ -96,11 +102,10 @@ struct segmento{
 			else{
 				///Posiblemente pueda sacar esto, revisar el HandleEventPoint...
 				//bajo un poco la sweep_line y reviso, solo se da en el caso de ser un punto interseccion
-				*(this->y) = altura - 2*error;  
+				*(this->y) = altura - 1;  
 				return *this < Q;
 			}
 		}
-		
 		
 	}
 	

@@ -17,6 +17,9 @@ struct nodo{	//Revisar si es necesario que este constituida como una clase, o si
 	nodo<T>* left;
 	nodo<T>* right;
 	
+//	int operator<<(nodo<T> Q){
+//		return 0;
+//	}
 };
 
 //Este arbol va a ser usado con Event_Points y con Segmentos, asi que ambas deberan tener sobregarcada la "Operacion <",
@@ -36,17 +39,23 @@ private:
 	
 	
 public:
+	
+	///ARREGLAR LA CLASE ARBOL!!!!!
+	
 	Arbol_B();
 	
 	//Ya se realiza una correcta insercion y balanceo...
-	void Insert(T ep);	//REVISAR SI NO SERIA NECESARIO RETORNAR EL AGREGADO...
-	nodo<T>* Insert(T ep, nodo<T>* act, nodo<T>* fact);
+	nodo<T>* Insert(T ep);	//REVISAR SI NO SERIA NECESARIO RETORNAR EL AGREGADO...
+	nodo<T>* Insert(T ep, nodo<T>* act);
 	
-	void Delete(T ep);
-	nodo<T>* Delete(T ep, nodo<T>* act, nodo<T>* elim);
+	nodo<T>* Delete(T ep);
+	nodo<T>* Delete(T ep, nodo<T>* act);
 	
 	nodo<T>* Find(T ep);	//para buscar un elemento determinado en el arbol.Util para el Delete
 	nodo<T>* Find(T ep, nodo<T>* act);
+	
+	void FindNeighbors(T &sl, T &sr, T p);
+	void FindNeighbors(T &sl, T &sr, T p, nodo<T>* act);
 	
 	//El mas izquierdo a partir de un nodo
 	nodo<T>* leftmost(nodo<T>* l);
@@ -57,8 +66,7 @@ public:
 	nodo<T>* rotate_right(nodo<T>* root);
 	
 	//realiza el balance del arbol, para arbol AVL, chequeo la altura por izuqierda y por derecha, si difiere, debo realizar un giro en ese sentido.
-	nodo<T>* balance_insert(nodo<T>* P, nodo<T>* N);
-	nodo<T>* balance_delete(nodo<T>* P, nodo<T>* N);
+	nodo<T>* balance(nodo<T>* P);
 	
 	bool empty();
 	nodo<T>* begin();

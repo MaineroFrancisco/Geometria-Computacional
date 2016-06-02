@@ -11,7 +11,7 @@ void reshape_cb (int w, int h) {
 	glViewport(0,0,w,h);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity ();
-	gluOrtho2D(0,w,0,h);
+	gluOrtho2D(0,10,0,10);
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
 }
@@ -43,63 +43,59 @@ void initialize() {
 	glClearColor(1.f,1.f,1.f,1.f);
 
 //------------------------------------------------------------------------------	
-	//ESTO ES ENTERAMENTE PARA EL TESTEO DE LA ESTRUCTURA ARBOL, LUEGO ELIMINAR...
-	Arbol_B<event_point> A;
-//	for (int i=0;i<16;i++){
-//		A.Insert(i);
-//	}
-	//No funciona para event_points y segmentos todavia... probar con MUCHOS ENTEROS,
-	//problema en el manejo del factor de balanceo... posiblemente deba eliminarlo como atributo,
-	//reemplazandolo por una funcion, o cambiar su tratamiento...
 	
-	event_point a,b;
-	a.p.x = 1;
-	a.p.y = 3;
-	b.p.x = 1;
-	b.p.y = 1; 
+	punto a,b,c,d;
+	a.x = 5; b.x = 3; c.x = 0; d.x = 10;
+	a.y = 0; b.y = 10; c.y = 4; d.y = 6;
 	
-	event_point c,d;
-	c.p.x = 3;
-	c.p.y = 3;
-	d.p.x = 3;
-	d.p.y = 1; 
+	segmento A,B;
+	A.ini = b; B.ini = d;
+	A.fin = a; B.fin = c;
 	
-	event_point e,f;
-	e.p.x = 2;
-	e.p.y = 4;
-	f.p.x = 2;
-	f.p.y = 6;
+	vector<segmento> S;
+	S.push_back(A); S.push_back(B);
 	
-	A.Insert(a);
-	A.Insert(b);
-	A.Insert(c);
-	A.Insert(d);
-	A.Insert(e);
-	A.Insert(f);
-
-//	A.show();
-	//cout<<endl;
-	//cout<<"Delete:"<<endl;
+	Interseccion i;
 	
-	//A.Delete(c);
-	cout<<"Insert: "<<endl<<endl;
-	A.show();
-	cout<<endl;
-	cout<<"Delete: "<<endl<<endl;
-
-	A.Delete(c);
-	A.Delete(d);
-	A.Delete(e);
+	i.FindIntersection(S);
 	
-	A.show();
-	
-//	char* asd = NULL;
-//	if(asd)	NULL = no...
-//		cout<<"es null"<<endl;
-//	if(!asd)
-//		cout<<"no es null"<<endl;
+	vector<punto> I = i.GetIntersection();
 	
 //------------------------------------------------------------------------------
+
+/////INSERT Y DELETE FUNCIONAN MEJOR...
+//	
+//Arbol_B<int> A;
+//A.Insert(1);
+//A.Insert(2);
+//A.Insert(3);
+//A.Insert(4);
+//A.Insert(5);
+//A.Insert(6);
+//A.Insert(7);
+//
+//A.Delete(1);
+//A.Delete(2);
+//A.Delete(3);
+//A.Delete(4);
+//A.Delete(5);
+//A.Delete(6);
+//A.Delete(7);
+//
+//A.show();
+//	
+//------------------------------------------------------------------------------	
+
+//	int* a;
+//	int b = 1;
+//	
+//	a=&b;
+//	
+//	cout<<*a<<endl;
+//	
+//	b = 0;
+//	
+//	cout<<*a<<endl;
 }
 
 int main (int argc, char **argv) {

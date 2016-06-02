@@ -12,7 +12,13 @@ Grafos Interseccion::grafo_resultante ( ) {
 	
 }
 
-vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
+///AL PRINCIPIO CUANDO SETEO LOS SEGMENTOS, DEBO HACER QUE SU CAMPO (*Y) APUNTE AL DOUBLE SWEEP_LINE
+/// DE LA CLASE, DE ESTE MODO LO UNICO QUE TENGO QUE HACER LUEGO ES CAMBIAR SWEEP_LINE CUANDO LO NECESITE
+/// Y NO VOLVER A TOCAR EL CAMPO (*Y).
+///COMO (*Y) APUNTA A LA DIRECCION DOUBLE SWEEP_LINE, AL CAMBIAR EL VALOR DE SWEEP_LINE, NO CAMBIA 
+///SU DIRECCION, CON LO CUAL (*Y) SIEMPRE SE MANTIENE ACTUALIZADA CON EL ULTIMO VALOR DE LA SWEEP_LINE.
+
+void Interseccion::FindIntersection (vector<segmento> S ) {
 	
 	///1) Inicializar Q el arbol que contendra los event_point
 	
@@ -23,6 +29,8 @@ vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
 	for (int i=0; i<n;i++){
 		
 		GraphConverter(S[i]);
+		S[i].y = &sweep_line;
+		
 		
 		///Como las aristas siempre se insertan al final, hago uso de eso 
 		///para asignar los halfedge correspondientes a cada segmento.
@@ -50,11 +58,15 @@ vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
 			Q.Insert(fin_aux);
 		}
 		
+		ini_aux.U.clear();
 	}
 	
 	///2) Inicializar el arbol de estados T...
 	
 	event_point aux;
+	
+	Q.show();
+	
 	while(!Q.empty()){
 		
 		aux = Q.leftmost(Q.begin())->p;
@@ -63,45 +75,55 @@ vector<vertex> Interseccion::FindIntersection (vector<segmento> S ) {
 		
 		Q.Delete(aux);
 		
+		cout<<"----------------------------------------------------------"<<endl;
+		
+		Q.show();
 	}
 	
 }
 
 ///AGREGAR FIND_LC A INTERSECCION...LO MISMO PARA LAS QUE SON EXTRA EN ARBOL...ELIMINAR LEFT Y RIGHT DE ARBOL_B
-void find_LC(event_point p, vector<segmento> L, vector<segmento> C, nodo<segmento>* n){
+void find_LC(event_point ep, vector<segmento> &L, vector<segmento> &C, nodo<segmento>* n){
 	
-	find_LC (p,L,C,n->left);
+	if(!n) return;
 	
-	if(n->p.fin == p.p){
+	find_LC (ep,L,C,n->left);
+	
+	if(n->p.fin == ep.p){
 		L.push_back(n->p);
 	}
 	else{
-		if(n->p.contains(p.p)){
+		if(n->p.contains(ep.p)){
 			C.push_back(n->p);
 		}
 	}
 	
-	find_LC (p,L,C,n->right);
+	find_LC (ep,L,C,n->right);
 }
 
 ///LO SIGUIENTES PASOS NO CONTEMPLAN UNA RECTA HORIZONTAL, REVISAR Y ARREGLAR...
-void Interseccion::HandleEventPoint (event_point p) {
+void Interseccion::HandleEventPoint (event_point ep) {
 	
 ///------------------------------------------------------------------------------------------------------
 ///Paso 1: Encontrar los segmentos en T que terminan o contienen al evento 'p', los que incian con 'p' 
 ///	se encuentran almacenados en el mismo event_point.
 	
 	vector<segmento> L, C;
-	find_LC(p,L,C,T.begin());
 	
-	int nU = p.U.size();
+	///PROBLEMAS: NO ENCUENTRA LA INTERSECCION, NO DEVUELVE CORRECTAMENTE LOS VECTORES...
+	
+	find_LC(ep,L,C,T.begin());
+	
+	int nU = ep.U.size();
 	int nL = L.size();
 	int nC = C.size();
+	
+	int nI = nU + nL + nC;
 	
 ///------------------------------------------------------------------------------------------------------
 ///Paso 2: Si existe mas de un segmento que comienza, contiene, o termina con este punto de evento, es una 
 ///	interseccion de varios segmentos y se lo trata correctamente.
-	if(nU + nL + nC > 1){
+	if(nI > 1){
 		
 		//REVISAR LA INTEGRACION DE ESTAS COSAS CON EL GRAFO....
 		
@@ -115,7 +137,7 @@ void Interseccion::HandleEventPoint (event_point p) {
 		
 		///Para el caso de los segmentos en U y L solo se requerira cambiar los NEXT y PREV.
 		
-		intersecciones.push_back(p.p);
+		intersecciones.push_back(ep.p);
 	}
 
 ///------------------------------------------------------------------------------------------------------
@@ -125,14 +147,18 @@ void Interseccion::HandleEventPoint (event_point p) {
 	///Altura de la sweep_line, para hacer la busqueda para eliminacion necesito pasarle la altura a los
 	///segmentos, para evitar problemas al ser punto de interseccion, elevo la sweep_line un poco, con lo
 	///cual evito que recorra de manera equivocada el arbol al comparar empleando el operador '<'.
-	double altura = p.p.y + 0.0000005;
+	sweep_line = ep.p.y;
+	
+	if(nI > 1) sweep_line++;
+	
+	///NO ESTA HACIENDO MAL LOS DELETE, EL PROBLEMA ESTA EN QUE AL NO COMPUTARSE LA INTERSECCION SE MUEVE MAL 
+	///POR EL ARBOL, COMPLETAR LA INTERSECCION...
+	
 	for(int i=0;i<nL;i++){
-		L[i].y = &altura;
 		T.Delete(L[i]);
 	}
 	
 	for(int i=0;i<nC;i++){
-		C[i].y = &altura;
 		T.Delete(C[i]);
 	}
 	
@@ -142,15 +168,13 @@ void Interseccion::HandleEventPoint (event_point p) {
 /// se concidera una altura por debajo de la sweep_line, asi evaluara la posicion de los segemtos justo 
 /// despues de la interseccion.
 	
-	altura = p.p.y - 0.0000005;
+	if(nI > 1) sweep_line = sweep_line - 2;
 	
 	for(int i=0;i<nU;i++){
-		p.U[i].y = &altura;
-		T.Insert( p.U[i] );
+		T.Insert( ep.U[i] );
 	}
 	
 	for(int i=0;i<nC;i++){
-		C[i].y = &altura;
 		T.Insert(C[i]);
 	}
 	
@@ -158,14 +182,13 @@ void Interseccion::HandleEventPoint (event_point p) {
 ///Paso 5: Insertar todos los segmentos que comienzan en el evento, los cuales estaran almacenados en el
 /// event_point mismo, y reinsertar todos los segmentos que pertenecen al conjunto C, para su reinsercion
 	
-	nodo<segmento>* sl = NULL;
-	nodo<segmento>* sr = NULL;
+	segmento sl, sr;
 	
 	if( nU + nC == 0){
 		
 		for(int i =0;i<nL;i++){
 			T.FindNeighbors(sl,sr,L[i]);
-			findNewEvent(sl->p,sr->p,p);
+			findNewEvent(sl,sr,ep);
 		}
 		
 	}
@@ -173,30 +196,39 @@ void Interseccion::HandleEventPoint (event_point p) {
 		segmento sI,sD; /// sI = segmento mas iaquierdo entre U y C, sL = segmento mas derecho entre U y C.
 		
 		//Crear estas funciones...
-		sI = LeftmostSegment(p.U, C);
-		sD = rightmostSegment(p.U, C);
 		
-		//Crear esta funcion...
+		if(ep.U.size()<C.size()){
+			sI = LeftmostSegment(C, ep.U);
+			sD = RightmostSegment(C, ep.U);	
+		}
+		else{
+			sI = LeftmostSegment(ep.U, C);
+			sD = RightmostSegment(ep.U, C);	
+		}
+		
 		T.FindNeighbors(sl,sr,sI);
-		findNewEvent(sl->p,sI,p);
 		
-		sl = NULL;
-		sr = NULL;
+		///ARREGLAR ESTA SECCION...
+		//findNewEvent(sl,sI,ep);
+		
+		//sl = NULL;
+		//sr = NULL;
 		
 		T.FindNeighbors(sl,sr,sD);
-		findNewEvent(sr->p,sD,p);
+		
+		//findNewEvent(sr,sD,ep);
 		
 	}
 	
 	///NO OLVIDAR PASAR LA ALTURA COMO REFERENCIA A LOS SEGMENTOS A LA HORA DE INSERTAR Y ELIMINAR...
 }
 
-void Interseccion::findNewEvent (segmento sl, segmento sr, event_point p) {
-	event_point* inter = NULL;
+void Interseccion::findNewEvent (segmento sl, segmento sr, event_point ep) {
+	event_point inter;
 	
-	if(Interseccion(sl,sr,inter)){
-		if(inter->p.y < p.p.y && !Q.Find(*inter)){
-			Q.Insert(*inter);
+	if(calc_inter(sl,sr, inter)){
+		if(inter.p.y < ep.p.y && !Q.Find(inter)){
+			Q.Insert(inter);
 		}
 	}
 	
@@ -206,7 +238,7 @@ double producto_cruz(punto A, punto B, punto C){	//segmento AB(b-a), y segmento 
 	return (B.x - A.x)*(C.y - A.y) - (C.x - A.x)*(B.y - A.y);
 }
 
-bool Interseccion::calc_inter (segmento s1, segmento s2, event_point &p) {
+bool Interseccion::calc_inter (segmento s1, segmento s2, event_point &ep) {
 	
 	///Segmento P
 	punto A = s1.ini;
@@ -233,13 +265,13 @@ bool Interseccion::calc_inter (segmento s1, segmento s2, event_point &p) {
 	
 	if(fabs(ABD-ABC)<fabs(CDB-CDA)){
 		a = (0-ABC)/(ABD-ABC); 
-		p.y = C.y*(1-a)+D.y*a;
-		p.x = C.x*(1-a)+D.x*a;
+		ep.p.y = C.y*(1-a)+D.y*a;
+		ep.p.x = C.x*(1-a)+D.x*a;
 	}
 	else{
 		a = (0-CDA)/(CDB-CDA); 
-		p.y = A.y*(1-a)+B.y*a;
-		p.x = A.x*(1-a)+B.x*a;
+		ep.p.y = A.y*(1-a)+B.y*a;
+		ep.p.x = A.x*(1-a)+B.x*a;
 	}
 	
 	return true;
@@ -278,3 +310,50 @@ void Interseccion::GraphConverter (segmento S) {
 	
 }
 
+segmento Interseccion::LeftmostSegment(vector<segmento> mayor, vector<segmento> menor){
+	int n = mayor.size();
+	int m = menor.size();
+	
+	segmento leftmost = mayor[0];
+	
+	for (int i=1;i<n;i++){
+		
+		if(mayor[i]< leftmost){
+			leftmost = mayor[i];
+		}
+		if(n<m){
+			if(menor[i]<leftmost){
+				leftmost = menor[i];
+			}
+		}
+		
+	}
+	
+	return leftmost;
+}
+
+segmento Interseccion::RightmostSegment(vector<segmento> mayor, vector<segmento> menor){
+	int n = mayor.size();
+	int m = menor.size();
+	
+	segmento rightmost = mayor[0];
+	
+	for (int i=1;i<n;i++){
+		
+		if(rightmost<mayor[i]){
+			rightmost = mayor[i];
+		}
+		if(n<m){
+			if(rightmost<menor[i]){
+				rightmost = menor[i];
+			}
+		}
+		
+	}
+	
+	return rightmost;
+}
+
+vector<punto> Interseccion::GetIntersection(){
+	return intersecciones;
+}
