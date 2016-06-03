@@ -37,6 +37,8 @@ public:
 		//reviso interseccion entre vecinos y maneja puntos de eventos en Q.
 	bool calc_inter(segmento s1, segmento s2, event_point &p); //calculo la interseccion entre segmentos.
 	
+	void FindNeighbors( nodo<segmento>* &sl, nodo<segmento>* &sr, segmento p, nodo<segmento>* act);
+	
 	///Pasos para la convercion a grafo.
 	
 	///Dado un conjunto de segmentos, devuelve los mismos traducidos a una estructura de grapo, para

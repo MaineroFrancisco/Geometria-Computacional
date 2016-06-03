@@ -53,10 +53,7 @@ public:
 	
 	nodo<T>* Find(T ep);	//para buscar un elemento determinado en el arbol.Util para el Delete
 	nodo<T>* Find(T ep, nodo<T>* act);
-	
-	void FindNeighbors(T &sl, T &sr, T p);
-	void FindNeighbors(T &sl, T &sr, T p, nodo<T>* act);
-	
+
 	//El mas izquierdo a partir de un nodo
 	nodo<T>* leftmost(nodo<T>* l);
 	//El mas derecho a partir de un nodo

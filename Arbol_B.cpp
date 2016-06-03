@@ -189,34 +189,6 @@ nodo<T>* Arbol_B<T>::Find (T ep, nodo<T>* act) {
 	}
 }
 
-template<class T>
-void Arbol_B<T>::FindNeighbors(T &sl, T &sr, T p){
-	FindNeighbors(sl,sr,p,raiz);
-}
-
-template<class T>
-void Arbol_B<T>::FindNeighbors (T &sl, T &sr, T p, nodo<T>* act) {
-	if(!act) return;
-	if(p == act->p){
-		if(act->left){
-			sl = rightmost(act->left)->p;
-		}
-		if(act->right){
-			sr = leftmost(act->right)->p;
-		}
-		return;
-	}
-		
-	
-	if(p<act->p){
-		sr = act->p;
-		FindNeighbors(sl,sr,p,act->left);
-	}
-	else{
-		sl = act->p;
-		FindNeighbors(sl,sr,p,act->right);
-	}
-}
 //------------------------------------------------------------------------------
 template<class T>
 nodo<T>* Arbol_B<T>::rotate_left (nodo<T>* root) {

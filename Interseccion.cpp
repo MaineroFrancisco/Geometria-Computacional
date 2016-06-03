@@ -182,13 +182,17 @@ void Interseccion::HandleEventPoint (event_point ep) {
 ///Paso 5: Insertar todos los segmentos que comienzan en el evento, los cuales estaran almacenados en el
 /// event_point mismo, y reinsertar todos los segmentos que pertenecen al conjunto C, para su reinsercion
 	
-	segmento sl, sr;
+	nodo<segmento>* sl = NULL;
+	nodo<segmento>* sr = NULL;
 	
 	if( nU + nC == 0){
 		
 		for(int i =0;i<nL;i++){
-			T.FindNeighbors(sl,sr,L[i]);
-			findNewEvent(sl,sr,ep);
+			FindNeighbors(sl,sr,L[i], T.begin());
+			
+			if(sl && sr){
+				findNewEvent(sl->p,sr->p,ep);
+			}
 		}
 		
 	}
@@ -206,21 +210,48 @@ void Interseccion::HandleEventPoint (event_point ep) {
 			sD = RightmostSegment(ep.U, C);	
 		}
 		
-		T.FindNeighbors(sl,sr,sI);
+		FindNeighbors(sl,sr,sI, T.begin());
 		
 		///ARREGLAR ESTA SECCION...
-		//findNewEvent(sl,sI,ep);
+		if(sl){
+			findNewEvent(sl->p,sI,ep);
+		}
 		
-		//sl = NULL;
-		//sr = NULL;
+		sl = NULL;
+		sr = NULL;
 		
-		T.FindNeighbors(sl,sr,sD);
+		FindNeighbors(sl,sr,sD, T.begin());
 		
-		//findNewEvent(sr,sD,ep);
+		if(sr){
+			findNewEvent(sr->p,sD,ep);
+		}
 		
 	}
 	
 	///NO OLVIDAR PASAR LA ALTURA COMO REFERENCIA A LOS SEGMENTOS A LA HORA DE INSERTAR Y ELIMINAR...
+}
+
+void Interseccion::FindNeighbors( nodo<segmento>* &sl, nodo<segmento>* &sr, segmento p, nodo<segmento>* act){
+	if(!act) return;
+	
+	if(p == act->p){
+		if(act->left){
+			sl = T.rightmost(act->left);
+		}
+		if(act->right){
+			sr = T.leftmost(act->right);
+		}
+		return;
+	}
+	
+	if(p<act->p){
+		sr = act;
+		FindNeighbors(sl,sr,p,act->left);
+	}
+	else{
+		sl = act;
+		FindNeighbors(sl,sr,p,act->right);
+	}
 }
 
 void Interseccion::findNewEvent (segmento sl, segmento sr, event_point ep) {

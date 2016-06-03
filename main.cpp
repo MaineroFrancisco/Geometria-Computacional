@@ -44,16 +44,19 @@ void initialize() {
 
 //------------------------------------------------------------------------------	
 	
-	punto a,b,c,d;
+	punto a,b,c,d,e,f;
 	a.x = 5; b.x = 3; c.x = 0; d.x = 10;
 	a.y = 0; b.y = 10; c.y = 4; d.y = 6;
 	
-	segmento A,B;
-	A.ini = b; B.ini = d;
-	A.fin = a; B.fin = c;
+	e.x = 1; f.x = 8; 
+	e.y = 0; f.y = 7;
+	
+	segmento A,B,C;
+	A.ini = b; B.ini = d; C.ini = f;
+	A.fin = a; B.fin = c; C.fin = e;
 	
 	vector<segmento> S;
-	S.push_back(A); S.push_back(B);
+	S.push_back(A); S.push_back(B);S.push_back(C);
 	
 	Interseccion i;
 	
@@ -61,6 +64,9 @@ void initialize() {
 	
 	vector<punto> I = i.GetIntersection();
 	
+	if(!I.empty()){
+		cout<<"HAY INTERSECCION: "<< I.size()<<endl;
+	}
 //------------------------------------------------------------------------------
 
 /////INSERT Y DELETE FUNCIONAN MEJOR...
