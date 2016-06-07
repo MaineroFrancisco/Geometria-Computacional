@@ -33,7 +33,7 @@ struct nodo{	//Revisar si es necesario que este constituida como una clase, o si
 template<class T>
 class Arbol_B {
 private:
-
+	
 	nodo<T>* raiz;
 	nodo<T>* actual;
 	
@@ -45,15 +45,15 @@ public:
 	Arbol_B();
 	
 	//Ya se realiza una correcta insercion y balanceo...
-	nodo<T>* Insert(T ep);	//REVISAR SI NO SERIA NECESARIO RETORNAR EL AGREGADO...
+	void Insert(T ep);	//REVISAR SI NO SERIA NECESARIO RETORNAR EL AGREGADO...
 	nodo<T>* Insert(T ep, nodo<T>* act);
 	
-	nodo<T>* Delete(T ep);
+	void Delete(T ep);
 	nodo<T>* Delete(T ep, nodo<T>* act);
 	
 	nodo<T>* Find(T ep);	//para buscar un elemento determinado en el arbol.Util para el Delete
 	nodo<T>* Find(T ep, nodo<T>* act);
-
+	
 	//El mas izquierdo a partir de un nodo
 	nodo<T>* leftmost(nodo<T>* l);
 	//El mas derecho a partir de un nodo
@@ -76,4 +76,3 @@ public:
 };
 
 #endif
-

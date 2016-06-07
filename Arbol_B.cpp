@@ -18,33 +18,10 @@ Arbol_B<T>::~Arbol_B() {
 ///Inserta el nodo a partir de la raiz, para insertarlo correctamente a izquierda o derecha, segun corresponda,
 ///y realizar el balanceo...
 template<class T>
-//no retorna nada, cambiar por void...
-
-///ULTIMA OPCION.... ELIMINAR EL PADRE DE LOS NODOS, USAR SOLO IZQUIERDA Y 
-///DERECHA, HACER EL BALANCEO AL INSERTAR CADA NODO, EN EL MISMO INSERT(), ME AHORRA EL USO EL PADRE
-nodo<T>* Arbol_B<T>::Insert (T ep) {
+void Arbol_B<T>::Insert (T ep) {
 	
-	if(!raiz){
-		raiz = new nodo<T>;
-		
-		raiz->p = ep;
-		
-		///No configuro aca el padre, sino cuando retorna...
-		raiz->left = NULL;
-		raiz->right = NULL;
-		
-		return raiz;
-	}
-	else{
-		raiz = Insert(ep, raiz);
-	}
+	raiz = Insert(ep, raiz);
 	
-//	if(actual->father){
-//		actual = actual->father;
-//		raiz = balance_insert(actual->father, actual);
-//	}
-	
-	return actual;
 }
 
 ///Operacion de insercion recursiva, al encontrar una hoja en NULL, inserta alli el nodo correspondiente...
@@ -56,7 +33,6 @@ nodo<T>* Arbol_B<T>::Insert (T ep, nodo<T>* act) {
 		
 		act->p = ep;
 		
-		///No configuro aca el padre, sino cuando retorna...
 		act->left = NULL;
 		act->right = NULL;
 		
@@ -76,7 +52,7 @@ nodo<T>* Arbol_B<T>::Insert (T ep, nodo<T>* act) {
 		act->right = Insert(ep, act->right);
 		
 	}
-
+	
 	return balance(act);
 }
 
@@ -84,14 +60,10 @@ nodo<T>* Arbol_B<T>::Insert (T ep, nodo<T>* act) {
 
 //Se supone que el nodo que quiero borrar esta si o si en el arbol.
 template<class T>
-nodo<T>* Arbol_B<T>::Delete(T ep){
+void Arbol_B<T>::Delete(T ep){
 	
-	///Posible problema al borrar la raiz...
 	raiz = Delete(ep, raiz);
-
-//	///actual es el padre del nodo eliminado...
-//	raiz = balance_delete(actual->father, actual);
-//	
+	
 }
 
 template<class T>
@@ -109,8 +81,6 @@ nodo<T>* Arbol_B<T>::Delete (T ep, nodo<T>* act) {
 			aux = rightmost(act->left);	
 			act->p=aux->p;
 			
-			if(!act->left) cout<<"NULL LEFT"<<endl;
-			
 			act->left = Delete(aux->p,act->left);
 			
 		}
@@ -118,8 +88,6 @@ nodo<T>* Arbol_B<T>::Delete (T ep, nodo<T>* act) {
 			if(act->right!=NULL){	
 				aux = leftmost(act->right);	
 				act->p=aux->p;
-				
-				if(!act->right) cout<<"NULL RIGHT"<<endl;
 				
 				act->right = Delete(aux->p,act->right);
 				
@@ -135,13 +103,43 @@ nodo<T>* Arbol_B<T>::Delete (T ep, nodo<T>* act) {
 		
 		if(ep<act->p){
 			
-			if(!act->left) cout<<"NULL LEFT SIN"<<endl;
+			if(!act->left){ 
+				cout<<"NULL LEFT SIN"<<endl;
+				
+				cout<<"---------------------------------------------------------"<<endl;
+				
+				cout<<"SEGMENTO: "<<endl;
+				ep.show();
+				
+				cout<<endl;
+				
+				cout<<"ARBOL T: "<<endl;
+				show();
+				cout<<"---------------------------------------------------------"<<endl;
+				
+				system("pause");
+			}
+			
 			act->left = Delete(ep,act->left);
 			
 		}
 		else{
 			
-			if(!act->right) cout<<"NULL RIGHT SIN"<<endl;
+			if(!act->right){
+				cout<<"NULL RIGHT SIN"<<endl;
+				
+				cout<<"---------------------------------------------------------"<<endl;
+				
+				cout<<"SEGMENTO: "<<endl;
+				ep.show();
+				
+				cout<<"ARBOL T: "<<endl;
+				show();
+				cout<<"---------------------------------------------------------"<<endl;
+				
+				system("pause");
+			}
+			
 			act->right = Delete(ep,act->right);
 			
 		}
@@ -200,7 +198,7 @@ nodo<T>* Arbol_B<T>::rotate_left (nodo<T>* root) {
 		}
 		P->left=root;
 	}
-
+	
 	return P;
 }
 
@@ -252,11 +250,11 @@ nodo<T>* Arbol_B<T>::balance(nodo<T>* P) {
 //Funciones Auxiliares Extras
 template<class T>
 int calc_nivel(nodo<T>* act){
-
+	
 	if(!act){
 		return 0;
 	}
-
+	
 	int nivel = 1;
 	nivel += max(calc_nivel(act->left),calc_nivel(act->right)); 
 	
@@ -302,7 +300,7 @@ void Arbol_B<T>::show (nodo<T>* act, int nivel) {
 	cout <<endl;
 	
 	if(act->right){
-			show(act->right,aux);
+		show(act->right,aux);
 	}
 	
 }
@@ -321,5 +319,3 @@ nodo<T>* Arbol_B<T>::begin ( ) {
 //template class Arbol_B<int>;
 template class Arbol_B<segmento>;
 template class Arbol_B<event_point>;
-
-

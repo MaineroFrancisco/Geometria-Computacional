@@ -4,8 +4,13 @@
 #include <vector>
 #include <list>
 #include <deque>
+#include <cmath>
 
 using namespace std;
+
+struct vertex;
+struct halfedge;
+struct face;
 
 //------------------------------------------------------------------------------------------------------------
 
@@ -18,12 +23,14 @@ struct punto{
 	bool operator<(punto P){
 		bool menor = false;
 		
+		double error = 1e-8;
+		
 		//Este colocara los mas altos e izquierdos, ala izquierda del arbol para 
 		//obtener el siguiente evento, buscando el leftmost(mas izquierdo) del arbol...
-		if(this->y > P.y)
+		if(this->y > P.y + error)
 			menor = true;
-		if(this->y == P.y){
-			if(this->x < P.x){
+		if(fabs(this->y - P.y)<= error){
+			if(this->x < P.x - error){
 				menor = true;
 			}
 		}
@@ -33,11 +40,10 @@ struct punto{
 	
 	bool operator==(punto P){
 		
-		double error = 0.000000005;
-		bool up = (this->x <= (P.x + error))  && (this->y <= (P.y + error));
-		bool down = (this->x >= (P.x - error))  && (this->y >= (P.y - error));
+		double error = 1e-8;
 		
-		return up&&down;
+		return fabs(this->x - P.x) <= error && fabs(this->y - P.y) <= error;
+		
 	}
 };
 
@@ -47,13 +53,11 @@ struct segmento{
 	
 	///Guarda una referencia a una de las media aristas que representan el segmento, empleada para la 
 	///construccion del grafo, guardara la media arista por debajo de la sweep_line. 
-	int halfEdge;
+	halfedge* arista;
 	
-	///CARGO EN CADA SEGMENTO UN PUNTERO A LA ALTURA DE LA SWEEP_LINE, SIEMPRE ANTES DE INSERTAR O ELIMINAR DEL ARBOL...
-	
+	///Referencia a la altura de la SWEEP_LINE en la clase INTERSECCION, de modo que puedan conocer
+	/// la altura de la misma cuando deban realizar las operaciones de comparacion
 	double* y;
-	
-	///VAS A TERMINAR PASANDO LA ALTURA COMO UN VALOR PARA EL SEMGENTO... MUCHO GASTO DE MEMORIA...
 	
 	double get_x(double altura){
 		
@@ -64,7 +68,7 @@ struct segmento{
 		double delta_x, delta_y, m, b, X;
 		
 		//Considerando la ecuacion de la recta:
-		//				y = m * x + b; Siendo m la pendiente de la recta, y b su coordenada de origen.
+//				y = m * x + b; Siendo m la pendiente de la recta, y b su coordenada de origen.
 		//Deduzco a partir de los puntos conocidos inicial y final la pendiente 
 		//y ordenada de origen, luego reemplazo por la altura buscada y calculo la x.
 		
@@ -78,7 +82,7 @@ struct segmento{
 		b= fin.y - m*fin.x;
 		
 		///Calculo de X a partir de un Y conocido.
-		//				(y - b) / m = x;
+//				(y - b) / m = x;
 		X = (altura - b) / m;
 		
 		return X;
@@ -87,9 +91,11 @@ struct segmento{
 	//bool operator<(segmento Q, double altura){
 	bool operator<(segmento Q){
 		
-		double error = 0.00000005;
-		double altura = *(this->y);
-		double A = this->get_x(altura);
+		///ARREGLADO PARCIAL, EL BIAS DEL ERROR ME ESTABA PROVOCANDO PROBLEMAS, REVISAR PORQUE...
+		double error = 1e-15;
+		
+		double altura = *y;
+		double A = get_x(altura);
 		double C = Q.get_x(altura);
 		
 		if(C < A-error){
@@ -100,10 +106,11 @@ struct segmento{
 				return false;
 			}
 			else{
-				///Posiblemente pueda sacar esto, revisar el HandleEventPoint...
-				//bajo un poco la sweep_line y reviso, solo se da en el caso de ser un punto interseccion
-				*(this->y) = altura - 1;  
-				return *this < Q;
+				A = get_x(altura-1);
+				C = Q.get_x(altura-1);
+				if(C < A - error) return true;
+				else 
+					return false;
 			}
 		}
 		
@@ -111,18 +118,18 @@ struct segmento{
 	
 	bool contains(punto p){
 		bool cont;
-		double error = 0.000000005;
+		double error = 1e-8;
 		double denom = fin.x-ini.x;
 		double alpha, suma;
 		if(!denom){
 			alpha = (p.y-ini.y)/(fin.y - ini.y);
 			suma = (1-alpha)*ini.x + (alpha)*fin.x;
-			cont = ((suma <= p.x+error)&&(suma >= p.x-error))&&(alpha>0&&alpha<1);
+			cont = fabs(suma - p.x) <= error && alpha>0 && alpha<1;
 		}
 		else{
 			alpha = (p.x-ini.x)/denom;
 			suma = (1-alpha)*ini.y + (alpha)*fin.y;
-			cont = ((suma <= p.y+error)&&(suma>=p.y-error))&&(alpha>=0&&alpha<=1);
+			cont = fabs(suma - p.y )<= error && alpha>0 && alpha<1;
 		}
 		
 		return cont;
@@ -133,24 +140,21 @@ struct segmento{
 	}
 	
 	void show(){
-		cout<< "Segmento: X: "<< this->ini.x <<"	Y: "<<this->ini.y<<endl;
+		cout<< "Segmento: X: "<< this->get_x(*this->y)<<"	Y: "<<*this->y<<endl;
 	}
 };
 
-///Puntos de Eventos, puntos significativos a la hora de recorrer con la linea de barrido
+
 struct event_point{
 	punto p; ///Coordenada del punto.
 	vector<segmento> U;	///Conjuntos de INDICES de los segmentos que comienzan en ese punto.
 	
-	//Para realizar la comparacion emplea la sobrecarga del operador "<", el cual utiliza
-	//orden lexicografico, primero el de mayor y, si hay varios con la misma y, el de menor x.
+	vertex* vertice;
+	
 	bool operator<(event_point P){
 		return this->p<P.p;
 	}
 	
-	//Sobrecarga necesaria para realizar la eliminacion de los elementos del arbol,
-	//es necesaria tanto para segmentos, como para eventos, ambas aprovechan la sobrecarga
-	//del mismo operador en la clase Punto.
 	bool operator==(event_point P){
 		return this->p==P.p;
 	}
@@ -162,12 +166,15 @@ struct event_point{
 };
 
 //------------------------------------------------------------------------------------------------------------
-struct halfedge;
-struct face;
-
 struct vertex{
 	punto p;
 	halfedge* incidente;
+	
+	vector<halfedge*> incidentes;
+	
+	void add_halfedge(halfedge *he) {
+		incidentes.push_back(he);
+	}
 };
 
 struct halfedge{
