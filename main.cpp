@@ -180,16 +180,16 @@ void initialize() {
 //	
 	//------------------------------------------------------------------------------	
 	
-	int *a;
-	int *b;
-	int c = 1;
-	b = &c;
-	a = b;
-	cout<<*a<<endl;
-	
-	b = 0;
-	
-	cout<<*a<<endl;
+//	int *a;
+//	int *b;
+//	int c = 1;
+//	b = &c;
+//	a = b;
+//	cout<<*a<<endl;
+//	
+//	b = 0;
+//	
+//	cout<<*a<<endl;
 }
 
 int main (int argc, char **argv) {
