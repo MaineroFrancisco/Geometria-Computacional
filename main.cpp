@@ -9,7 +9,8 @@ using namespace std;
 
 vector<segmento> S;
 vector<punto> I;
-Grafos graph;
+Grafos *graph;
+Interseccion Is;
 
 bool hecho = false;
 
@@ -66,15 +67,17 @@ void display_cb() {
 	//------------------------------------------------------------------------------
 	
 	///LO UNICO QUE ME QUEDA SOLUCIONAR SON ERRORES DE PRECISION... LOS BIAS DE ERROR ME HACEN CAGADA...
-	
-	Interseccion Is;
 		
 	if(!hecho){
 		
-		for(int i=0;i<5;i++){
+		for(int i=0;i<50;i++){
 			S.push_back(Get_Segment());
 		}
 		
+//		///TESTEAR CON MAS DE 2 SEGMENTOS INTERSECTADOS EN UN PUNTO...
+//		S.push_back()
+//		
+			
 		for(int i = 0; i< S.size();i++){
 			
 			glColor3f(.0f,.0f,.0f);
@@ -127,29 +130,27 @@ void display_cb() {
 			
 		}
 		
-		if(!graph.vertice.empty()){
-			for(int i=0;i<graph.vertice.size();i++){
-				glColor3f(.0f,1.0f,.0f);
-				glPointSize(4);
-				glBegin(GL_POINTS);
-				glVertex2d(graph.vertice[i].p.x,graph.vertice[i].p.y);
-				glEnd();
-			}
-		}
-		
-		///Problema para mostrar las aristas, no esoty seguro qeu sea, pinta ser cosa de opengl...
-//		cout<<"Aristas: "<<graph.arista.size()<<endl;
-//		if(!graph.arista.empty()){
-//			for(int i=0;i<graph.arista.size();i++){
+//		if(!graph->vertice.empty()){
+//			for(int i=0;i<graph->vertice.size();i++){
+//				glColor3f(.0f,1.0f,.0f);
+//				glPointSize(4);
+//				
+//				glBegin(GL_POINTS);
+//					glVertex2d(graph->vertice[i].p.x,graph->vertice[i].p.y);
+//				glEnd();
+//			}
+//			
+//			for(int i=0;i<graph->arista.size();i++){
 //				
 //				glColor3f(.0f,1.0f,.0f);
 //				glLineWidth(2.0f);
 //				
-//				glBegin(GL_POINTS);
-//					glVertex2d(graph.arista[i].origen->p.x,graph.arista[i].origen->p.y);
-//				//	glVertex2d(graph.arista[i].gemela->origen->p.x,graph.arista[i].gemela->origen->p.y);
+//				glBegin(GL_LINES);
+//					glVertex2d(graph->arista[i].origen->p.x,graph->arista[i].origen->p.y);
+//					glVertex2d(graph->arista[i].gemela->origen->p.x,graph->arista[i].gemela->origen->p.y);
 //				glEnd();
 //			}
+//			
 //		}
 		
 		if(!I.empty()){

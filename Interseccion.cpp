@@ -8,8 +8,8 @@ Interseccion::~Interseccion() {
 	
 }
 
-Grafos Interseccion::grafo_resultante ( ) {
-	return grafo;
+Grafos* Interseccion::grafo_resultante ( ) {
+	return &grafo;
 }
 
 ///MEDIDA DEL ERROR: 0.000000005;
@@ -80,12 +80,11 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	///Creo un vertice en el grafo por cada event_point, obtengo luego una referencia a dicho vertex en el 
 	///grafo, para poder hacer el enlace con los halfedge en pasos posteriores.
 	
-	vertex V, *Ve;
+	vertex V, *Ve = NULL;
 	
 	V.p = ep.p;
 	grafo.vertice.push_back(V);
-	Ve = &grafo.vertice.back();
-	
+	Ve = &grafo.vertice[grafo.vertice.size()-1];
 	
 	///------------------------------------------------------------------------------------------------------
 	///Paso 3: Eliminar todos los segmentos que terminan o contienen al evento del arbol de estado, en el caso
@@ -95,16 +94,17 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	
 	if(nC > 1) sweep_line += 1e-9;
 	
+	halfedge H, *He=NULL , Tw, *Te=NULL;
+	
 	for(int i=0;i<nL;i++){
 		
 		///Completar al grafo, con el vertex origen de las twin para cada segmento que necesite terminar...
-		halfedge *He , *Te;
 		He = L[i].arista;
 		Te = He->gemela;
 		
 		Te->origen = Ve;
 		
-		//Ve->incidente = Te;
+		Ve->incidente = Te;
 		
 		T.Delete(L[i]);
 	}
@@ -125,7 +125,6 @@ void Interseccion::HandleEventPoint (event_point ep) {
 		
 		///Crear HALFEDGE para incorporar al grafo...
 		
-		halfedge H, *He , Tw, *Te;
 		H.origen = Ve;
 		grafo.arista.push_back(H);
 		
@@ -138,7 +137,7 @@ void Interseccion::HandleEventPoint (event_point ep) {
 		He->gemela = Te;
 		Te->gemela = He;
 		
-		//Ve->incidente = He;
+		Ve->incidente = He;
 		
 		ep.U[i].arista = He;
 		

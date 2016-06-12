@@ -27,7 +27,7 @@ private:
 public:
 	Interseccion();
 	
-	Grafos grafo_resultante(); ///Devuelve finalmente el grafo resultante del conjunto de segmentos.
+	Grafos* grafo_resultante(); ///Devuelve finalmente el grafo resultante del conjunto de segmentos.
 	
 	void InitializeQ(vector<segmento> S);
 	
