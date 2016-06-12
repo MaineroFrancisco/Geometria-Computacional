@@ -51,12 +51,8 @@ struct segmento{
 	punto ini;
 	punto fin;
 	
-	///Guarda una referencia a una de las media aristas que representan el segmento, empleada para la 
-	///construccion del grafo, guardara la media arista por debajo de la sweep_line. 
 	halfedge* arista;
 	
-	///Referencia a la altura de la SWEEP_LINE en la clase INTERSECCION, de modo que puedan conocer
-	/// la altura de la misma cuando deban realizar las operaciones de comparacion
 	double* y;
 	
 	double get_x(double altura){
@@ -149,8 +145,6 @@ struct event_point{
 	punto p; ///Coordenada del punto.
 	vector<segmento> U;	///Conjuntos de INDICES de los segmentos que comienzan en ese punto.
 	
-	vertex* vertice;
-	
 	bool operator<(event_point P){
 		return this->p<P.p;
 	}
@@ -170,11 +164,11 @@ struct vertex{
 	punto p;
 	halfedge* incidente;
 	
-	vector<halfedge*> incidentes;
-	
-	void add_halfedge(halfedge *he) {
-		incidentes.push_back(he);
-	}
+//	vector<halfedge*> incidentes;
+//	
+//	void add_halfedge(halfedge *he) {
+//		incidentes.push_back(he);
+//	}
 };
 
 struct halfedge{

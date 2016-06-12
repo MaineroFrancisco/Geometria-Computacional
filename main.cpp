@@ -9,6 +9,7 @@ using namespace std;
 
 vector<segmento> S;
 vector<punto> I;
+Grafos graph;
 
 bool hecho = false;
 
@@ -66,9 +67,11 @@ void display_cb() {
 	
 	///LO UNICO QUE ME QUEDA SOLUCIONAR SON ERRORES DE PRECISION... LOS BIAS DE ERROR ME HACEN CAGADA...
 	
+	Interseccion Is;
+		
 	if(!hecho){
 		
-		for(int i=0;i<50;i++){
+		for(int i=0;i<5;i++){
 			S.push_back(Get_Segment());
 		}
 		
@@ -91,14 +94,12 @@ void display_cb() {
 		}
 		
 		///--------------------------------------------------------------------
-		Interseccion i;
 		
-		///ERROR, NO ME ESTA HACIENDO BIEN EL SWAP DE LOS SEGMENTOS...
-		///REALIZAR UN SEGUIMIENTO DEL ALGORITMO PARA VERIFICAR LOS CASOS...
-		///MUY PROBABLE PROBLEMA DE PRECISION...
-		i.FindIntersection(S);
+		Is.FindIntersection(S);
 		
-		I = i.GetIntersection();
+		I = Is.GetIntersection();
+		
+		graph = Is.grafo_resultante();
 		
 		if(!I.empty()){
 			cout<<"HAY INTERSECCION: "<< I.size()<<endl;
@@ -126,6 +127,31 @@ void display_cb() {
 			
 		}
 		
+		if(!graph.vertice.empty()){
+			for(int i=0;i<graph.vertice.size();i++){
+				glColor3f(.0f,1.0f,.0f);
+				glPointSize(4);
+				glBegin(GL_POINTS);
+				glVertex2d(graph.vertice[i].p.x,graph.vertice[i].p.y);
+				glEnd();
+			}
+		}
+		
+		///Problema para mostrar las aristas, no esoty seguro qeu sea, pinta ser cosa de opengl...
+//		cout<<"Aristas: "<<graph.arista.size()<<endl;
+//		if(!graph.arista.empty()){
+//			for(int i=0;i<graph.arista.size();i++){
+//				
+//				glColor3f(.0f,1.0f,.0f);
+//				glLineWidth(2.0f);
+//				
+//				glBegin(GL_POINTS);
+//					glVertex2d(graph.arista[i].origen->p.x,graph.arista[i].origen->p.y);
+//				//	glVertex2d(graph.arista[i].gemela->origen->p.x,graph.arista[i].gemela->origen->p.y);
+//				glEnd();
+//			}
+//		}
+		
 		if(!I.empty()){
 			for(int i = 0; i< I.size();i++){
 				
@@ -133,7 +159,7 @@ void display_cb() {
 				glPointSize(3);
 				
 				glBegin(GL_POINTS);
-				glVertex2d(I[i].x,I[i].y);
+					glVertex2d(I[i].x,I[i].y);
 				glEnd();
 				
 			}

@@ -9,7 +9,7 @@ Interseccion::~Interseccion() {
 }
 
 Grafos Interseccion::grafo_resultante ( ) {
-	
+	return grafo;
 }
 
 ///MEDIDA DEL ERROR: 0.000000005;
@@ -30,8 +30,6 @@ void Interseccion::FindIntersection (vector<segmento> S ) {
 	
 	event_point aux;
 	
-	//Q.show();
-	
 	while(!Q.empty()){
 		
 		aux = Q.leftmost(Q.begin())->p;
@@ -40,9 +38,6 @@ void Interseccion::FindIntersection (vector<segmento> S ) {
 		
 		Q.Delete(aux);
 		
-		//cout<<"----------------------------------------------------------"<<endl;
-		
-		//Q.show();
 	}
 	
 }
@@ -65,17 +60,14 @@ void find_LC(event_point ep, vector<segmento> &L, vector<segmento> &C, nodo<segm
 	
 	find_LC (ep,L,C,n->right);
 }
+///------------------------------------------------------------------------------------------------------
 
-///LO SIGUIENTES PASOS NO CONTEMPLAN UNA RECTA HORIZONTAL, REVISAR Y ARREGLAR...
 void Interseccion::HandleEventPoint (event_point ep) {
 	
-	///------------------------------------------------------------------------------------------------------
 	///Paso 1: Encontrar los segmentos en T que terminan o contienen al evento 'p', los que incian con 'p' 
 	///	se encuentran almacenados en el mismo event_point.
 	
 	vector<segmento> L, C;
-	
-	///PROBLEMAS: NO ENCUENTRA LA INTERSECCION, NO DEVUELVE CORRECTAMENTE LOS VECTORES...
 	
 	find_LC(ep,L,C,T.begin());
 	
@@ -84,58 +76,41 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	int nC = C.size();
 	
 	int nI = nU + nL + nC;
+
+	///Creo un vertice en el grafo por cada event_point, obtengo luego una referencia a dicho vertex en el 
+	///grafo, para poder hacer el enlace con los halfedge en pasos posteriores.
 	
-	///------------------------------------------------------------------------------------------------------
-	///Paso 2: Si existe mas de un segmento que comienza, contiene, o termina con este punto de evento, es una 
-	///	interseccion de varios segmentos y se lo trata correctamente.
-	if(nI > 1){
-		
-		//REVISAR LA INTEGRACION DE ESTAS COSAS CON EL GRAFO....
-		
-		
-		///En los conjuntos U,C y L se poseen todos los segmentos que se intersectan en este punto de evento,
-		///en cuanto a la integracion del grafo, en este punto puedo tomar todos estos segmentos y realizar
-		/// los procedimientos necesario para actualizar el grafo.
-		
-		///Para el caso de los segmentos en C, se deberan crear 2 halfedge nuevos, enlazarlos correctamente, y corregir
-		///los NEXT y PREV como corresponda, debido a esto, los segmentos en C deberian ser los primeros en tratarse,
-		///REVISAR!...
-		
-		///Para el caso de los segmentos en U y L solo se requerira cambiar los NEXT y PREV.
-		
-		intersecciones.push_back(ep.p);
-	}
+	vertex V, *Ve;
+	
+	V.p = ep.p;
+	grafo.vertice.push_back(V);
+	Ve = &grafo.vertice.back();
+	
 	
 	///------------------------------------------------------------------------------------------------------
 	///Paso 3: Eliminar todos los segmentos que terminan o contienen al evento del arbol de estado, en el caso
 	/// de los segmentos que contienen al evento, su eliminacion y reinsercion.	
 	
-	///Altura de la sweep_line, para hacer la busqueda para eliminacion necesito pasarle la altura a los
-	///segmentos, para evitar problemas al ser punto de interseccion, elevo la sweep_line un poco, con lo
-	///cual evito que recorra de manera equivocada el arbol al comparar empleando el operador '<'.
 	sweep_line = ep.p.y;
-	
-	///NO ESTA HACIENDO MAL LOS DELETE, EL PROBLEMA ESTA EN QUE AL NO COMPUTARSE LA INTERSECCION SE MUEVE MAL 
-	///POR EL ARBOL, COMPLETAR LA INTERSECCION...
 	
 	if(nC > 1) sweep_line += 1e-9;
 	
 	for(int i=0;i<nL;i++){
+		
+		///Completar al grafo, con el vertex origen de las twin para cada segmento que necesite terminar...
+		halfedge *He , *Te;
+		He = L[i].arista;
+		Te = He->gemela;
+		
+		Te->origen = Ve;
+		
+		//Ve->incidente = Te;
+		
 		T.Delete(L[i]);
 	}
 	
 	for(int i=0;i<nC;i++){
-//		cout<<"---------------------------------------------------------"<<endl;
-//		cout<<"ARBOL T: "<<endl;
-//		T.show();
-//		cout<<"---------------------------------------------------------"<<endl;
-//		
 		T.Delete(C[i]);
-		
-//		cout<<"---------------------------------------------------------"<<endl;
-//		cout<<"ARBOL T: "<<endl;
-//		T.show();
-//		cout<<"---------------------------------------------------------"<<endl;
 	}
 	
 	///------------------------------------------------------------------------------------------------------
@@ -144,30 +119,35 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	/// se concidera una altura por debajo de la sweep_line, asi evaluara la posicion de los segemtos justo 
 	/// despues de la interseccion.
 	
-	
-	///EL ERROR ESTABA ACA, SI BAJO O SUBO MUCHO LA sweep_line CON RESPECTO A LOS PUNTOS QUE SE INTERSECTAN,
-	/// ALTERO EL ORDEN COMPLETO DEL ARBOL, SE LO DEBE MANEJAR CON CUIDADO COMO AL ERROR...
 	if(nC > 1) sweep_line -= 2*1e-9;
 	
 	for(int i=0;i<nU;i++){
+		
+		///Crear HALFEDGE para incorporar al grafo...
+		
+		halfedge H, *He , Tw, *Te;
+		H.origen = Ve;
+		grafo.arista.push_back(H);
+		
+		He = &grafo.arista.back();
+		
+		grafo.arista.push_back(Tw);
+		
+		Te = &grafo.arista.back();
+		
+		He->gemela = Te;
+		Te->gemela = He;
+		
+		//Ve->incidente = He;
+		
+		ep.U[i].arista = He;
+		
 		T.Insert( ep.U[i] );
 	}
 	
 	for(int i=0;i<nC;i++){
-//		cout<<"---------------------------------------------------------"<<endl;
-//		cout<<"ARBOL T: "<<endl;
-//		T.show();
-//		cout<<"---------------------------------------------------------"<<endl;
-//		
 		T.Insert(C[i]);
-		
-//		cout<<"---------------------------------------------------------"<<endl;
-//		cout<<"ARBOL T: "<<endl;
-//		T.show();
-//		cout<<"---------------------------------------------------------"<<endl;
 	}
-	
-	//if(nC > 1) sweep_line += 0.000000005;
 	
 	///------------------------------------------------------------------------------------------------------
 	///Paso 5: Insertar todos los segmentos que comienzan en el evento, los cuales estaran almacenados en el
@@ -190,8 +170,6 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	else{
 		segmento sI,sD; /// sI = segmento mas iaquierdo entre U y C, sL = segmento mas derecho entre U y C.
 		
-		//Crear estas funciones...
-		
 		if(ep.U.size()<C.size()){
 			sI = LeftmostSegment(C, ep.U);
 			sD = RightmostSegment(C, ep.U);	
@@ -203,7 +181,6 @@ void Interseccion::HandleEventPoint (event_point ep) {
 		
 		FindNeighbors(sl,sr,sI, T.begin());
 		
-		///ARREGLAR ESTA SECCION...
 		if(sl){
 			findNewEvent(sl->p,sI,ep);
 		}
@@ -217,9 +194,32 @@ void Interseccion::HandleEventPoint (event_point ep) {
 			findNewEvent(sr->p,sD,ep);
 		}
 		
-	}	
+	}
+	
+	///------------------------------------------------------------------------------------------------------
+	///Paso 2: Si existe mas de un segmento que comienza, contiene, o termina con este punto de evento, es una 
+	///	interseccion de varios segmentos y se lo trata correctamente.
+	
+	if(nI > 1){
+		
+		///Si el evento es interseccion y no es ni inicio ni fin de un segmento, hara falta crear el vertex
+		///en el grafo para corregir los segmnetos, sino ya se lo tiene referenciado en Ve.
+		
+		///En los conjuntos U,C y L se poseen todos los segmentos que se intersectan en este punto de evento,
+		///en cuanto a la integracion del grafo, en este punto puedo tomar todos estos segmentos y realizar
+		/// los procedimientos necesario para actualizar el grafo.
+		
+		///Para el caso de los segmentos en C, se deberan crear 2 halfedge nuevos, enlazarlos correctamente, y corregir
+		///los NEXT y PREV como corresponda, debido a esto, los segmentos en C deberian ser los primeros en tratarse,
+		///REVISAR!...
+		
+		///Para el caso de los segmentos en U y L solo se requerira cambiar los NEXT y PREV.
+		
+		intersecciones.push_back(ep.p);
+	}
 }
 
+///-----------------------------------------------------------------------------------------------------------
 void Interseccion::FindNeighbors( nodo<segmento>* &sl, nodo<segmento>* &sr, segmento p, nodo<segmento>* act){
 	if(!act) return;
 	
@@ -348,16 +348,7 @@ void Interseccion::InitializeQ(vector<segmento> S){
 	int n = S.size();
 	for (int i=0; i<n;i++){
 		
-		//GraphConverter(S[i]);
 		S[i].y = &sweep_line;
-		
-		
-		///Como las aristas siempre se insertan al final, hago uso de eso 
-		///para asignar los halfedge correspondientes a cada segmento.
-		
-		//Señala a la arista izquierda, la que corresponderia al interior, puedo moverme a 
-		//cualquiera haciendo uso de la gemela.
-		//S[i].halfEdge = grafo.arista.size()-1;	
 		
 		evI.p = S[i].ini;
 		evI.U.push_back(S[i]);
