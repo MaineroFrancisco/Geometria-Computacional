@@ -70,7 +70,7 @@ void display_cb() {
 		
 	if(!hecho){
 		
-		for(int i=0;i<50;i++){
+		for(int i=0;i<5;i++){
 			S.push_back(Get_Segment());
 		}
 		
@@ -130,7 +130,7 @@ void display_cb() {
 			
 		}
 		
-//		if(!graph->vertice.empty()){
+		if(!graph->vertice.empty()){
 //			for(int i=0;i<graph->vertice.size();i++){
 //				glColor3f(.0f,1.0f,.0f);
 //				glPointSize(4);
@@ -139,19 +139,21 @@ void display_cb() {
 //					glVertex2d(graph->vertice[i].p.x,graph->vertice[i].p.y);
 //				glEnd();
 //			}
-//			
-//			for(int i=0;i<graph->arista.size();i++){
-//				
-//				glColor3f(.0f,1.0f,.0f);
-//				glLineWidth(2.0f);
-//				
-//				glBegin(GL_LINES);
-//					glVertex2d(graph->arista[i].origen->p.x,graph->arista[i].origen->p.y);
-//					glVertex2d(graph->arista[i].gemela->origen->p.x,graph->arista[i].gemela->origen->p.y);
-//				glEnd();
-//			}
-//			
-//		}
+			
+			for(int i=0;i<graph->arista.size();i++){
+				
+				glColor3f(.0f,1.0f,.0f);
+				glLineWidth(2.0f);
+				
+				glBegin(GL_LINES);
+					glVertex2d(graph->arista[i].origen->p.x,graph->arista[i].origen->p.y);
+					glVertex2d(graph->arista[i].gemela->origen->p.x,graph->arista[i].gemela->origen->p.y);
+				glEnd();
+			}
+			
+			cout<<"ARISTAS: "<< graph->arista.size()<<endl;
+			
+		}
 		
 		if(!I.empty()){
 			for(int i = 0; i< I.size();i++){

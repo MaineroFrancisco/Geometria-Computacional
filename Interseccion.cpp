@@ -42,7 +42,6 @@ void Interseccion::FindIntersection (vector<segmento> S ) {
 	
 }
 
-///AGREGAR FIND_LC A INTERSECCION...LO MISMO PARA LAS QUE SON EXTRA EN ARBOL...ELIMINAR LEFT Y RIGHT DE ARBOL_B
 void find_LC(event_point ep, vector<segmento> &L, vector<segmento> &C, nodo<segmento>* n){
 	
 	if(!n) return;
@@ -81,10 +80,67 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	///grafo, para poder hacer el enlace con los halfedge en pasos posteriores.
 	
 	vertex V, *Ve = NULL;
+	halfedge *H = NULL, *He=NULL , *Tw = NULL, *Te=NULL;
 	
 	V.p = ep.p;
 	grafo.vertice.push_back(V);
-	Ve = &grafo.vertice[grafo.vertice.size()-1];
+	Ve = &grafo.vertice.back();
+	
+	
+	///------------------------------------------------------------------------------------------------------
+	///Paso 2: Si existe mas de un segmento que comienza, contiene, o termina con este punto de evento, es una 
+	///	interseccion de varios segmentos y se lo trata correctamente.
+	
+	if(nI > 1){
+		
+		///Si el evento es interseccion y no es ni inicio ni fin de un segmento, hara falta crear el vertex
+		///en el grafo para corregir los segmnetos, sino ya se lo tiene referenciado en Ve.
+		
+		///En los conjuntos U,C y L se poseen todos los segmentos que se intersectan en este punto de evento,
+		///en cuanto a la integracion del grafo, en este punto puedo tomar todos estos segmentos y realizar
+		/// los procedimientos necesario para actualizar el grafo.
+		
+		///Para el caso de los segmentos en C, se deberan crear 2 halfedge nuevos, enlazarlos correctamente, y corregir
+		///los NEXT y PREV como corresponda, debido a esto, los segmentos en C deberian ser los primeros en tratarse,
+		///REVISAR!...
+		
+		///Para el caso de los segmentos en U y L solo se requerira cambiar los NEXT y PREV.
+		
+		if(nC){
+			
+			for(int i=0;i<nC;i++){
+				
+				///Crear HALFEDGE para incorporar al grafo...
+				He = C[i].arista;
+				Te = He->gemela;
+				
+				H = new halfedge;
+				H->origen = Ve;
+				
+				grafo.arista.push_back(*H);
+				delete H;
+				H = &grafo.arista.back();
+				
+				Tw = new halfedge;
+				Tw->origen = Ve;
+				
+				grafo.arista.push_back(*Tw);
+				delete Tw;
+				Tw = &grafo.arista.back();
+				
+				He->gemela = H;
+				Te->gemela = Tw;
+				
+				H->gemela = He;
+				Tw->gemela = Te;
+				
+				C[i].arista = Tw;
+				///-------------------------------------------------------------
+			}
+		}
+		
+		intersecciones.push_back(ep.p);
+	}
 	
 	///------------------------------------------------------------------------------------------------------
 	///Paso 3: Eliminar todos los segmentos que terminan o contienen al evento del arbol de estado, en el caso
@@ -92,9 +148,7 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	
 	sweep_line = ep.p.y;
 	
-	if(nC > 1) sweep_line += 1e-9;
-	
-	halfedge H, *He=NULL , Tw, *Te=NULL;
+	if(nC) sweep_line += 1e-9;
 	
 	for(int i=0;i<nL;i++){
 		
@@ -119,19 +173,22 @@ void Interseccion::HandleEventPoint (event_point ep) {
 	/// se concidera una altura por debajo de la sweep_line, asi evaluara la posicion de los segemtos justo 
 	/// despues de la interseccion.
 	
-	if(nC > 1) sweep_line -= 2*1e-9;
+	if(nC) sweep_line -= 2*1e-9;
 	
 	for(int i=0;i<nU;i++){
 		
 		///Crear HALFEDGE para incorporar al grafo...
 		
-		H.origen = Ve;
-		grafo.arista.push_back(H);
+		H = new halfedge;
+		Tw = new halfedge;
 		
+		H->origen = Ve;
+		grafo.arista.push_back(*H);
+		delete H;
 		He = &grafo.arista.back();
 		
-		grafo.arista.push_back(Tw);
-		
+		grafo.arista.push_back(*Tw);
+		delete Tw;
 		Te = &grafo.arista.back();
 		
 		He->gemela = Te;
@@ -195,27 +252,6 @@ void Interseccion::HandleEventPoint (event_point ep) {
 		
 	}
 	
-	///------------------------------------------------------------------------------------------------------
-	///Paso 2: Si existe mas de un segmento que comienza, contiene, o termina con este punto de evento, es una 
-	///	interseccion de varios segmentos y se lo trata correctamente.
-	
-	if(nI > 1){
-		
-		///Si el evento es interseccion y no es ni inicio ni fin de un segmento, hara falta crear el vertex
-		///en el grafo para corregir los segmnetos, sino ya se lo tiene referenciado en Ve.
-		
-		///En los conjuntos U,C y L se poseen todos los segmentos que se intersectan en este punto de evento,
-		///en cuanto a la integracion del grafo, en este punto puedo tomar todos estos segmentos y realizar
-		/// los procedimientos necesario para actualizar el grafo.
-		
-		///Para el caso de los segmentos en C, se deberan crear 2 halfedge nuevos, enlazarlos correctamente, y corregir
-		///los NEXT y PREV como corresponda, debido a esto, los segmentos en C deberian ser los primeros en tratarse,
-		///REVISAR!...
-		
-		///Para el caso de los segmentos en U y L solo se requerira cambiar los NEXT y PREV.
-		
-		intersecciones.push_back(ep.p);
-	}
 }
 
 ///-----------------------------------------------------------------------------------------------------------
